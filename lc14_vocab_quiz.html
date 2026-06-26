@@ -1,0 +1,476 @@
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content=""width=device-width, initial-scale="1.0">
+  <title>Quizz LC14</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+      
+<div id="app">
+  <h2 class="sr-only">Quiz de vocabulaire LC14</h2>
+  <div class="header">
+    <div class="title">Entraînement pour l'examen final</div>
+    <div class="stats">
+      <div class="stat">✓ <span id="correct-count">0</span></div>
+      <div class="stat">✗ <span id="wrong-count">0</span></div>
+      <div class="stat"><span id="remaining-count">?</span> restants</div>
+    </div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+  <div class="filter-row">
+    <span style="font-size:13px;color:var(--color-text-secondary);align-self:center">Mode :</span>
+    <button class="active" id="btn-all" onclick="setFilter('all')">Tout (274)</button>
+    <button id="btn-wrong" onclick="setFilter('wrong')">Erreurs uniquement</button>
+  </div>
+  <div id="quiz-area"></div>
+</div>
+
+<script>
+const vocab = [
+  ["A disease","An illness or sickness"],
+  ["A vaccine","A substance used to stimulate the production of antibodies and provide immunity against one or several diseases"],
+  ["A coil","Length of rope, hair, or wire, arranged into a series of circles, one above or outside the other"],
+  ["A needle","A very thin sharp metal tube used for putting medicine or drugs into your body, or for taking blood out. It is fixed to a plastic tube called a syringe"],
+  ["To vaccinate","To confer immunity against a specific disease, usually employing an innocuous form of the disease agent, to stimulate antibody production; to inoculate"],
+  ["A vaccine-preventable disease","A disease which could be stopped from spreading through vaccination "],
+  ["To inoculate","To implant a disease agent or antigen in a person, animal, or plant to produce a disease for study or to stimulate disease resistance"],
+  ["Countless","Innumerable, too many to be counted"],
+  ["An actuator","A device that causes a machine or other device to operate"],
+  ["Tough","Strong, hard"],
+  ["A vial","A small container for medicines, typically cylindrical and made of glass"],
+  ["By no means","Not at all, in no way"],
+  ["State-of-the-art","Very up-to-date, using the latest technology"],
+  ["A sensor","A device that detects or measures a physical property and records, indicates, or otherwise responds to it"],
+  ["Conventionally","De manière conventionnelle"],
+  ["Unrivalled","Sans égal"],
+  ["Wavelength-dependent","Dépendant de la longueur d'onde"],
+  ["Trademark","A distinctive name, symbol, word or picture that a company uses to identify its products or services"],
+  ["A threat","An indication of impending danger, the expression of an intention to inflict harm"],
+  ["An uprising","A rebellion, a popular revolt against authority"],
+  ["An artifact","Object made by human work, primitive tool, structure, or part of a functional item"],
+  ["Humanoid","Having human form or characteristics"],
+  ["Autonomous cars","Robotic vehicles designed to travel between destinations without human intervention"],
+  ["The scope","The area covered by a given activity or subject, the range of one's perceptions, thought or actions"],
+  ["Tell-tale signs","Clues or indications which reveal information"],
+  ["Sensors","Devices which detect and respond to information from the physical environment (light, heat, movement, moisture, etc.)"],
+  ["Vision tracking","Measuring eye position and eye movement"],
+  ["AC","Air Conditioning"],
+  ["Appliance","A device or piece of equipment designed to perform a specific task, especially in the kitchen"],
+  ["Insight","An accurate and deep understanding"],
+  ["Inanimate","Not alive, as humans and other animals and plants are"],
+  ["Seamless","Smooth and continuous, with no apparent spaces between one part and the next"],
+  ["Hardware","The machines, wiring, and other physical components of a computer or other electronic system"],
+  ["Actuators","Devices that cause machines or other devices to operate"],
+  ["Gateway","A device used to connect two networks, especially a connection to the internet"],
+  ["GSM","Global system for mobile telecommunications"],
+  ["Aggregate","To form or group into a class or cluster"],
+  ["Burden","A load, typically a heavy one"],
+  ["Wearables","Appliances and gadgets that you can wear"],
+  ["Grid","A system of wires through which electricity is connected to different parts of a region"],
+  ["To prod","To urge or push forward, as if with a pointed object; to use with prompts"],
+  ["A chatbot","A computer program or character, mimicking the actions of a person, which is designed to converse with human beings"],
+  ["To debut","To make a first appearance, to present to the public for the first time"],
+  ["Buzzkill","A person, event or circumstance that has a depressing or negative effect"],
+  ["To plagiarize","To steal and use the ideas or words of another as one's own, without crediting the source"],
+  ["To be the butt of a joke","To be the target or victim of a joke"],
+  ["Alignment","The arrangement of groups or forces in relation to one another"],
+  ["Fancier","Extravagant; executed with technical skill and style; more complicated"],
+  ["Buggy","Filled with bugs — unexpected defects, flaws or imperfections"],
+  ["Classic","Traditional, enduring, serving as a standard of excellence"],
+  ["Plausible","Appearing as worthy of belief"],
+  ["Haiku","A poem in the form of a Japanese verse, with three lines with 5-7-5 syllables respectively"],
+  ["Bias","An inclination, or outlook; a personal and sometimes unreasoned judgment"],
+  ["To access","To be able to use, enter, or get near something; here, to open or load in a computer context"],
+  ["To disclose","To make known, to make public"],
+  ["Dichotomy","A division or contrast between two things that are opposed or entirely different"],
+  ["All-but-indistinguishable","Very nearly or almost impossible to tell apart"],
+  ["Drift","To move or develop from one thing towards another, perceived as unwelcome"],
+  ["i.e","Stands for id est — Latin for 'that is'; used to specify meaning or make an idea more clear"],
+  ["Prompts","Noun: something serving to suggest or remind, usually to encourage an action or reply"],
+  ["Cratered","To crater: to destroy or ruin, or poke holes in something"],
+  ["Queries","Questions"],
+  ["Ostensibly","To all intents and purposes, apparently"],
+  ["Human- and chatbot-penned","Describes something produced in writing by a human or a chatbot"],
+  ["Propensity","A natural inclination or tendency"],
+  ["Academics","Teachers at university"],
+  ["Or lack thereof","A shortage of the thing mentioned"],
+  ["Issue","An important topic for debate or discussion"],
+  ["Notoriously","Emphasizes that a quality or fact is well-known to be bad (adverb)"],
+  ["Walled off","Enclosed figuratively, isolated from other people or ideas"],
+  ["Pushback","A negative or unfavourable reaction or response"],
+  ["Associate professor","A mid-level, usually tenured, university faculty member"],
+  ["CTO","Chief Technology Officer: a senior executive responsible for managing the technological requirements of a company"],
+  ["Databricks","An American enterprise software company founded by the creators of Apache Spark, an open-source analytics engine for large-scale data processing"],
+  ["Fine-tuning","The act of making small adjustments to something in order to achieve the best or a desired performance"],
+  ["Rudimentary","Involving or limited to basic principles, basic"],
+  ["Benchmarks","Standards or points of reference against which things may be compared"],
+  ["Nonetheless","Néanmoins"],
+  ["For a start","Pour commencer"],
+  ["Thoroughly","Minutieusement"],
+  ["Thorough","Minutieux"],
+  ["Immunotherapy","A type of therapy that uses substances to stimulate or suppress the immune system to help the body fight cancer, infection and other diseases"],
+  ["To get rid of","To take action so as to be free of, or delete an unwanted thing"],
+  ["Quadriplegic","Affected by or relating to the paralysis of all four limbs"],
+  ["Stem cells","The body's raw materials — the cells from which all other cells with specialized functions are created"],
+  ["Innate","Inborn, natural"],
+  ["Liver","A large reddish-brown glandular organ that secretes bile, functions in metabolism, and detoxifies poisonous substances"],
+  ["Diabetes","A disease that occurs when the blood glucose (blood sugar) is too high"],
+  ["Lifespan","The length of time for which a person or animal lives, or a thing functions"],
+  ["Holistic","In medicine: the treatment of the whole person, taking into account mental and social factors along with the symptoms of a disease"],
+  ["To leverage","To use something to maximum advantage "],
+  ["A transplant","To take a living tissue or organ and implant it to another part of the body or to another body"],
+  ["Voice box","Larynx"],
+  ["Cybernetics","The science of communications and automatic control systems in both machines and living things"],
+  ["Gimmick","A trick or device intended to attract attention"],
+  ["A disorder","An illness that disrupts normal physical or mental functions, a disease"],
+  ["An upgrade","An improvement"],
+  ["Gold leaf","Gold that has been beaten into a very thin sheet"],
+  ["Rucksack","A backpack used for carrying heavy loads"],
+  ["From scratch","From the very beginning, without relying on any previous work for assistance"],
+  ["Synapses","Junctions between two nerve cells where impulses pass via neurotransmission"],
+  ["Scope","Range, reach, stretch, expanse"],
+  ["Hardware/software","The physical material used in computers and electronic devices / the programs used to make the devices work or run"],
+  ["Enhancement","Something that is an improvement in quality or value, or an increase in ability"],
+  ["Cognitive","Involving or related to conscious intellectual activity"],
+  ["At will","At whatever time or in whatever way one pleases or wants"],
+  ["Primitive","Very basic or unsophisticated in terms of comfort, convenience or efficiency"],
+  ["Train of thought","Line of reasoning or the way in which someone reaches a conclusion"],
+  ["Feasibility","State or degree of being easily done or carried out"],
+  ["Prosthetics","Artificial body parts; also the domain/science of developing artificial body parts"],
+  ["Pacemaker","A device for stimulating the heart muscle and regulating its contractions"],
+  ["Limb","An arm or a leg"],
+  ["To rival","To compete with or be equal to"],
+  ["To merge","To combine or join together"],
+  ["To warp","To bend or twist out of shape"],
+  ["Aside","What comes before the word 'a_____' should be ignored for the moment"],
+  ["Tales","Stories"],
+  ["Inexorably","Completely, definitely, no doubt, inescapably"],
+  ["Commodities","Raw materials or primary agricultural products that can be bought and sold, such as copper or coffee; useful or valuable things"],
+  ["Settlers","People who move with a group of others to live in a new country or area"],
+  ["To bode","To foretell or predict that future developments or events will be good or favorable"],
+  ["To decimate","To kill a large number of something, to reduce something severely"],
+  ["Symbiotic","Involving interaction between two different organisms living in close physical association"],
+  ["Despoiled","To have valuable possessions stolen or violently removed; plundered"],
+  ["Manifest destiny","A 19th-century cultural belief in the US that American settlers were destined to expand across North America"],
+  ["Disingenuous","Not candid or sincere, typically by pretending to know less than one does; deceitful"],
+  ["Far-fetched","Unlikely and unconvincing; implausible"],
+  ["Blindsided","Hit or attacked on one's blind side"],
+  ["Multilimbed","Having many arms and/or legs"],
+  ["Cluster","A group of similar things or people positioned or occurring closely together"],
+  ["Vista","A pleasing view"],
+  ["Cliff","A steep rock face, especially at the edge of a sea or other flat geographical feature"],
+  ["To pan","To move slowly from one side to another, often referring to a camera"],
+  ["Haze","A slight obscuration of an atmosphere, typically caused by fine suspended particles"],
+  ["To whisk","To move someone or something suddenly and quickly"],
+  ["Rendering","A representation of something; here, a graphic representation of designs"],
+  ["White paper","A publication of detailed plans and information for the construction of a project or technology"],
+  ["To thrust","To make a sudden, strong forward movement (verb and noun)"],
+  ["Adrenaline junkie","A person with a compulsive desire for excitement and adventure"],
+  ["Utterly","Completely, absolutely"],
+  ["Logistics","The detailed organization and implementation of a complex operation"],
+  ["Short-haul","A relatively short distance in terms of travel or the transport of goods"],
+  ["Hub","The effective center of an activity, region, or network"],
+  ["Proponent","A person who advocates a theory, proposal, or course of action"],
+  ["Daunting","Seeming difficult to deal with in prospect; intimidating"],
+  ["On-ramp/off-ramp","A usually short one-way road leading onto or off of a main highway"],
+  ["Lane switch","When a train or other ground vehicle changes its trajectory to the right or left"],
+  ["Viability","The ability to work successfully; the quality or state of being viable"],
+  ["Feasibility","The state or degree of being easily or conveniently done"],
+  ["Stakeholders","Persons with an interest or concern in something, especially in business"],
+  ["Interoperability","When different systems can communicate with each other"],
+  ["To grind out","To produce something in a slow and tedious way"],
+  ["Fitted","Where an automated system is installed"],
+  ["To deploy","To send out, to bring into effective action"],
+  ["Reliable","Dependable (from the verb 'rely')"],
+  ["To sow something","To disseminate or introduce something, usually something negative"],
+  ["To pave the way","To make something easier"],
+  ["To unleash","To let out, to let go"],
+  ["To rebuff","To reject someone or something in an abrupt or ungracious manner"],
+  ["A bill","A draft of a proposed law presented to parliament or a legislature"],
+  ["Impaired","Weakened or damaged, or having a specified disability"],
+  ["Thorny","Causing distress, difficulty or trouble"],
+  ["Teamster","A lorry/truck driver"],
+  ["Plaintiff","A person who brings a case against another in a court of law"],
+  ["To vow","To solemnly promise to do a specified thing"],
+  ["Pitch","To try to persuade someone to buy or accept something (verb)"],
+  ["Raw","Uncooked, not processed yet"],
+  ["Fluctuate","To rise and fall irregularly in number or amount; to change irregularly"],
+  ["Intrinsic","Belonging naturally; essential"],
+  ["Brittle","Hard, but easy to break"],
+  ["Digital twin","A virtual model designed to accurately reflect a physical object"],
+  ["Interoperability for a computer","The ability of computer systems or software to exchange and make use of information"],
+  ["Swap","To exchange or trade"],
+  ["Pop-up retail","A temporary retail space used to introduce a new product line, test a market or generate awareness"],
+  ["Wayfinding","The process of ascertaining one's position and planning and following a route, with a GPS for example"],
+  ["Asset","A useful or valuable thing or person"],
+  ["Curated","Carefully chosen and thoughtfully organized or presented"],
+  ["Discourse","Written or spoken communication or debate (noun)"],
+  ["Tangible","Perceptible by touch (adjective)"],
+  ["Keepsake","A small item kept in memory of a person or event; a memento or relic"],
+  ["Recollection","A memory, something that is remembered (noun)"],
+  ["A forecast","To predict or estimate a future event or trend"],
+  ["Pillow","A soft cushion used to sleep"],
+  ["Peculiarity","An unusual characteristic or habit"],
+  ["Ableist","Adjective meaning the most able (created by Huxley)"],
+  ["To succumb","To fail to resist pressure, temptation, or some other negative force"],
+  ["Reluctant","Unwilling and hesitant; reticent"],
+  ["Frightful","Very unpleasant or shocking — used for emphasis, especially of something bad"],
+  ["Prospect","The possibility or likelihood of some future event occurring"],
+  ["Servitude","The state of being a slave or completely subject to someone more powerful"],
+  ["Peasant","A poor smallholder or agricultural labourer of low social status"],
+  ["Estate","An extensive area of land in the country, usually with a large house, owned by one person or family"],
+  ["Enunciate","To express a proposition, theory, etc. in clear or definite terms"],
+  ["To implement","To put a decision, plan, agreement or idea into effect"],
+  ["To fulfill","To achieve or accomplish something desired, promised, or predicted; to carry out as expected"],
+  ["Lockdown","A period in which movement within or access to an area is restricted in the interests of public safety or health"],
+  ["Drawbacks","Features that render something less acceptable; disadvantages or problems"],
+  ["Beg the question","To raise a point that has not been dealt with; to invite an obvious question"],
+  ["Brought to light","Made widely known or evident"],
+  ["To capture","To take into one's possession or control by force"],
+  ["Displayed","Put in a prominent place in order that it may readily be seen"],
+  ["To surrender","To give up or hand over a person, right, or possession, typically when forced"],
+  ["To be compromised","To be left in a state of confusion or uncertainty, or to be left unsafe"],
+  ["Breach","An act of breaking or failing to observe a law, agreement, or code of conduct"],
+  ["Sought after","Much in demand; generally desired"],
+  ["Malicious","Characterized by an intent to do harm"],
+  ["To retrieve","To find or extract information stored in a computer"],
+  ["Convenience","The state of being able to proceed with something without difficulty"],
+  ["Nuclei","Plural of nucleus: the positively charged central core of an atom, consisting of protons and neutrons"],
+  ["Merge","To combine or cause to combine to form a single entity"],
+  ["Quantum tunneling","A quantum mechanical process where wave functions can penetrate through a potential barrier"],
+  ["Fusing","Joining together (of groups of atoms or cellular structures)"],
+  ["Harness","To control and make use of natural resources, especially to produce energy"],
+  ["Splitting","The action of dividing or causing to divide into parts or elements"],
+  ["Literally","In a manner that is free from exaggeration or distortion"],
+  ["Figure something out","To understand or to solve a problem"],
+  ["Smush","To crush or smash (informal)"],
+  ["Holy Grail","A thing that is eagerly pursued or sought after"],
+  ["Electrical grid","A network of synchronized power providers and consumers connected by transmission and distribution lines"],
+  ["Feat","An achievement that requires great courage, skill, or strength"],
+  ["Blast","To blow up or break apart with explosive force (verb)"],
+  ["Milestone","A significant stage or event in the development of something"],
+  ["Bombard","To attack continuously to cause destruction"],
+  ["Pellets","Small, rounded, compressed masses of a substance"],
+  ["Swaths","A large number of people or things"],
+  ["Hyping","To promote or publicize a product or idea intensively, often exaggerating its benefits"],
+  ["Jamboree","A large celebration or party, typically a lavish and noisy one"],
+  ["Overcome","To defeat, to succeed in dealing with a problem or difficulty"],
+  ["Inexhaustible","Unable to be used up because existing in abundance"],
+  ["Weary","Feeling or showing extreme tiredness, especially from excessive exertion; bored"],
+  ["Hacks","Persons who are mediocre in their activity; people who think they know something but don't"],
+  ["Higgs boson","An elementary particle in the Standard Model of particle physics produced by the quantum excitation of the Higgs field"],
+  ["Unravelling","To investigate and solve or explain something complicated or puzzling"],
+  ["Saviours","Persons who save someone or something from danger or difficulty"],
+  ["Trigger","To cause an event or situation to happen or exist (verb)"],
+  ["Melting","Making or becoming liquid by heat"],
+  ["Searing hot","Extremely hot (from the verb 'to sear': to burn with sudden and intense heat)"],
+  ["Impetus","Something that makes a process or activity happen or happen more quickly"],
+  ["Input","A contribution of work or information"],
+  ["Emphatic","Expressing something forcibly and clearly"],
+  ["Pin on","To attach on"],
+  ["Bogged down","To cause something to sink or become stuck"],
+  ["Sustainable Development","Economic development conducted without depletion of natural resources"],
+  ["To eradicate","To permanently reduce a disease to zero cases; to eliminate"],
+  ["To promote","To encourage, to foster"],
+  ["Iron deficiency","A lack of iron"],
+  ["To estimate","To roughly calculate or judge a quantity or number"],
+  ["Predominantly","Mainly, essentially"],
+  ["Daily iron intake","The amount of iron absorbed every day"],
+  ["Reusable","Can be used again"],
+  ["To fade away","To disappear gradually until invisible"],
+  ["Compliance rate","The percentage of people who follow their treatment correctly"],
+  ["Three-fold","Having three parts or members"],
+  ["Affordable","Not too expensive"],
+  ["Foundry","A workshop or factory for casting metal"],
+  ["Cardboard","Material made from cellulose fibre like paper, but thicker. Widely used in packaging."],
+  ["NGO","A non-governmental organization: any non-profit, voluntary citizens' group organized on a local, national or international level"],
+  ["To dispel a myth","To drive away or cause to vanish, usually through factual explanation"],
+  ["The bottom-line","The last line of a financial balance sheet, therefore the profits"],
+  ["To be speechless","To be so surprised that you are at a loss for words, you don't know what to say"],
+  ["An award","A prize"],
+  ["To be bullied","To undergo harassment, to be victimized"],
+  ["To be blunt","To tell the truth in a very direct, perhaps undiplomatic way"],
+  ["To wipe out","To eliminate, to eradicate"],
+  ["To tackle a problem","To address or deal with a problem"],
+  ["To embrace a goal","To willingly accept a challenge and rise up to it"],
+  ["A company's core activities","A company's main activities"],
+  ["To catch on to a trend","To realize that a trend is happening, and to adapt"],
+  ["To embed","To fix firmly in a surrounding mass"],
+  ["To struggle to do something","To have difficulties in doing something"],
+  ["Invaluable","Extremely useful, indispensable"],
+  ["A custom plan","A comprehensive plan developed specifically to suit your business, in order to introduce changes"],
+  ["A mission statement","A formal statement of the aims and values of a company or organization"],
+  ["To vet a company","To perform a background check, to check that a company is legal and honest"]
+];
+
+function generateHint(word) {
+  return word.split(' ').map(w => {
+    if (!w) return '';
+    if (w.length === 1) return w;
+    return w[0] + '_'.repeat(w.length - 1);
+  }).join(' ');
+}
+
+function normalize(s) {
+  return s.toLowerCase().trim()
+    .replace(/['']/g, "'")
+    .replace(/\s+/g, ' ')
+    .replace(/^(a |an |the )/i, '');
+}
+
+let queue = [];
+let wrongIds = new Set();
+let correct = 0;
+let wrong = 0;
+let current = null;
+let answered = false;
+let filterMode = 'all';
+let total = 0;
+let done = 0;
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function startQuiz(mode) {
+  filterMode = mode;
+  if (mode === 'all') {
+    queue = shuffle(vocab.map((v, i) => i));
+  } else {
+    queue = shuffle([...wrongIds]);
+    wrongIds.clear();
+  }
+  correct = 0; wrong = 0; answered = false;
+  total = queue.length; done = 0;
+  nextQuestion();
+}
+
+function setFilter(mode) {
+  document.getElementById('btn-all').classList.toggle('active', mode === 'all');
+  document.getElementById('btn-wrong').classList.toggle('active', mode === 'wrong');
+  if (mode === 'wrong' && wrongIds.size === 0) {
+    document.getElementById('quiz-area').innerHTML = '<div class="card" style="text-align:center;color:var(--color-text-secondary);padding:2rem">Aucune erreur pour le moment — continue le quiz !</div>';
+    return;
+  }
+  startQuiz(mode);
+}
+
+function nextQuestion() {
+  answered = false;
+  if (queue.length === 0) {
+    showEnd();
+    return;
+  }
+  const idx = queue.shift();
+  current = { idx, word: vocab[idx][0], definition: vocab[idx][1] };
+  done++;
+  updateStats();
+  renderQuestion();
+}
+
+function updateStats() {
+  document.getElementById('correct-count').textContent = correct;
+  document.getElementById('wrong-count').textContent = wrong;
+  document.getElementById('remaining-count').textContent = queue.length;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  document.getElementById('progress').style.width = pct + '%';
+}
+
+function renderQuestion() {
+  const hint = generateHint(current.word);
+  document.getElementById('quiz-area').innerHTML = `
+    <div class="card">
+      <div class="question-num">Question ${done} / ${total}</div>
+      <div class="definition">${current.definition}</div>
+      <div class="hint">Indice : <code>${hint}</code></div>
+      <div class="input-row">
+        <input type="text" id="answer-input" placeholder="Votre réponse…" autocomplete="off" autocorrect="off" spellcheck="false" />
+        <button onclick="checkAnswer()">Vérifier</button>
+      </div>
+      <div id="feedback"></div>
+      <div style="margin-top:0.75rem;text-align:right">
+        <button class="skip-btn" onclick="skipQuestion()">Passer</button>
+      </div>
+    </div>
+  `;
+  const inp = document.getElementById('answer-input');
+  inp.focus();
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') { answered ? nextQuestion() : checkAnswer(); } });
+}
+
+function checkAnswer() {
+  if (answered) return;
+  const inp = document.getElementById('answer-input');
+  const userAnswer = inp.value.trim();
+  if (!userAnswer) return;
+  answered = true;
+  inp.disabled = true;
+
+  const correct_answer = current.word;
+  const isCorrect = normalize(userAnswer) === normalize(correct_answer) ||
+    userAnswer.toLowerCase().trim() === correct_answer.toLowerCase().trim();
+
+  const fb = document.getElementById('feedback');
+  if (isCorrect) {
+    correct++;
+    fb.className = 'feedback correct';
+    fb.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Correct !';
+  } else {
+    wrong++;
+    wrongIds.add(current.idx);
+    fb.className = 'feedback wrong';
+    fb.innerHTML = `<i class="ti ti-x" aria-hidden="true"></i> La réponse était : <span class="answer">${correct_answer}</span>`;
+  }
+  updateStats();
+
+  const area = document.getElementById('quiz-area');
+  const btn = document.createElement('button');
+  btn.className = 'btn-next';
+  btn.textContent = queue.length === 0 ? 'Voir les résultats →' : 'Question suivante →';
+  btn.onclick = nextQuestion;
+  area.querySelector('.card').appendChild(btn);
+
+  document.getElementById('btn-wrong').textContent = `Erreurs (${wrongIds.size})`;
+}
+
+function skipQuestion() {
+  if (answered) return;
+  wrongIds.add(current.idx);
+  wrong++;
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback wrong';
+  fb.innerHTML = `Réponse : <span class="answer">${current.word}</span>`;
+  answered = true;
+  document.getElementById('answer-input').disabled = true;
+  updateStats();
+  const area = document.getElementById('quiz-area');
+  const btn = document.createElement('button');
+  btn.className = 'btn-next';
+  btn.textContent = queue.length === 0 ? 'Voir les résultats →' : 'Question suivante →';
+  btn.onclick = nextQuestion;
+  area.querySelector('.card').appendChild(btn);
+  document.getElementById('btn-wrong').textContent = `Erreurs (${wrongIds.size})`;
+}
+
+function showEnd() {
+  const total_done = correct + wrong;
+  const pct = total_done > 0 ? Math.round((correct / total_done) * 100) : 0;
+  let emoji = pct >= 80 ? '🎉' : pct >= 50 ? '💪' : '📚';
+  document.getElementById('quiz-area').innerHTML = `
+    <div class="card end-card">
+      <div style="font-size:40px;margin-bottom:0.5rem">${emoji}</div>
+      <div class="score-big">${correct} / ${total_done}</div>
+      <div class="score-label">${pct}% de bonnes réponses</div>
+      ${wrongIds.size > 0 ? `<button onclick="setFilter('wrong')" style="margin-bottom:8px;cursor:pointer;width:100%;height:40px;font-size:14px">Retravailler les ${wrongIds.size} erreurs</button>` : ''}
+      <button onclick="startQuiz('all')" style="cursor:pointer;width:100%;height:40px;font-size:14px">Recommencer (tout)</button>
+    </div>
+  `;
+  document.getElementById('progress').style.width = '100%';
+}
+
+startQuiz('all');
+</script>
